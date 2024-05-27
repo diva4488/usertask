@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assigned Tasks</title>
+</head>
+<body>
+    <h2>Assigned Tasks</h2>
+    <ul>
+        {% for survey in surveys %}
+            <li>{{ survey.name }} - {{ survey.date_time }} - {{ survey.status }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>

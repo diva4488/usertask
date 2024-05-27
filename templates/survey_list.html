@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Survey List</title>
+    <style>
+        /* Add your custom CSS styles here */
+        .survey-box {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .plus-button {
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .survey-details {
+            margin-bottom: 20px;
+        }
+
+        /* Style for survey status */
+        .survey-status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h2>Survey List</h2>
+    
+    <!-- Survey List -->
+    <div class="survey-details">
+        {% for survey in surveys %}
+            <div class="survey-box">
+                <p>{{ survey.name }} - {{ survey.date_time }} - {{ survey.owner.username }} - <span class="survey-status">{{ survey.status }}</span></p>
+                {% if user.role == 'admin' or user.role == 'manager' %}
+                    <form class="status-form" id="status_form_{{ survey.id }}" data-survey-id="{{ survey.id }}" action="/change_status/{{ survey.id }}/" method="POST">
+                        {% csrf_token %}
+                        <label for="status_select_{{ survey.id }}">Select status:</label>
+                        <select name="status" id="status_select_{{ survey.id }}">
+                            <option value="Pending" {% if survey.status == 'Pending' %} selected {% endif %}>Pending</option>
+                            <option value="Ongoing" {% if survey.status == 'Ongoing' %} selected {% endif %}>Ongoing</option>
+                            <option value="Completed" {% if survey.status == 'Completed' %} selected {% endif %}>Completed</option>
+                        </select>
+                        <input type="button" value="Change Status" onclick="updateStatus('{{ survey.id }}')">
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Plus button for creating a new survey -->
+    <a href="{% url 'create_survey' %}" class="plus-button">+</a>
+
+    <br><br>
+    <a href="{% url 'logout' %}">Logout</a>
+
+    
+
+     <!--<script>
+        // Add event listener for form submission
+        document.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            const form = event.target; // Get the form element
+            const formData = new FormData(form); // Create FormData object from form
+            const surveyId = form.getAttribute('data-survey-id'); // Get survey ID from form attribute
+            const url = form.getAttribute('action'); // Get form action URL
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in request headers
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json(); // Parse the JSON response
+                } else {
+                    throw new Error('Failed to update status');
+                }
+            })
+            .then(data => {
+                // Update the status directly in the HTML
+                document.getElementById(`status_${surveyId}`).innerText = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script> -->
+    <!--<script>
+        // Add event listener for form submission
+        document.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            const form = event.target; // Get the form element
+            const formData = new FormData(form); // Create FormData object from form
+            const surveyId = form.getAttribute('data-survey-id'); // Get survey ID from form attribute
+            const url = form.getAttribute('action'); // Get form action URL
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in request headers
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json(); // Parse the JSON response
+                } else {
+                    throw new Error('Failed to update status');
+                }
+            })
+            .then(data => {
+                // Update the status directly in the HTML
+                document.getElementById(`status_${surveyId}`).innerText = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>-->
+<script>
+      function updateStatus(surveyId) {
+            const formData = new FormData();
+            const statusSelect = document.getElementById(`status_select_${surveyId}`);
+            const newStatus = statusSelect.value;
+            formData.append('status', newStatus);
+
+            fetch(`/change_status/${surveyId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update status');
+                }
+            })
+            .then(data => {
+                document.getElementById(`status_${surveyId}`).innerText = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+</script>
+</body>
+</html>
