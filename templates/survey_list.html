@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html>
 <head>
     <title>Survey List</title>
@@ -35,7 +35,7 @@
 <body>
     <h2>Survey List</h2>
     
-    <!-- Survey List -->
+    <!-- Survey List 
     <div class="survey-details">
         {% for survey in surveys %}
             <div class="survey-box">
@@ -52,11 +52,16 @@
                         <input type="button" value="Change Status" onclick="updateStatus('{{ survey.id }}')">
                     </form>
                 {% endif %}
+                <ul>
+                    {% for log in survey.logs.all %}
+                        <li>{{ log.timestamp }} - {{ log.message }}</li>
+                    {% endfor %}
+                </ul>
             </div>
         {% endfor %}
     </div>
 
-    <!-- Plus button for creating a new survey -->
+    <!-- Plus button for creating a new survey 
     <a href="{% url 'create_survey' %}" class="plus-button">+</a>
 
     <br><br>
@@ -121,7 +126,7 @@
             })
             .catch(error => console.error('Error:', error));
         });
-    </script>-->
+    </script>
 <script>
       function updateStatus(surveyId) {
             const formData = new FormData();
@@ -149,5 +154,120 @@
             .catch(error => console.error('Error:', error));
         }
 </script>
+</body>
+</html>-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Survey List</title>
+    <style>
+        /* Add your custom CSS styles here */
+        .survey-box {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .plus-button {
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .survey-details {
+            margin-bottom: 20px;
+        }
+
+        /* Style for survey status */
+        .survey-status {
+            font-weight: bold;
+        }
+
+        /* Style for logs */
+        .log-entry {
+            margin-top: 10px;
+            padding: 5px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h2>Survey List</h2>
+    
+    <!-- Survey List -->
+    <div class="survey-details">
+        {% for survey in surveys %}
+            <div class="survey-box">
+                <p>{{ survey.name }} - {{ survey.date_time }} - {{ survey.owner.username }} - <span class="survey-status">{{ survey.status }}</span></p>
+                <!-- Display logs -->
+                {% if survey.logs.all %}
+                    <div class="logs">
+                        <h4>Logs:</h4>
+                        {% for log in survey.logs.all %}
+                            <div class="log-entry">
+                                <p>{{ log.timestamp|date:"F d, Y - H:i:s" }}</p>
+                                <p>{{ log.message }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <!-- End logs section -->
+                {% if user.role == 'admin' or user.role == 'manager' %}
+                    <form class="status-form" id="status_form_{{ survey.id }}" data-survey-id="{{ survey.id }}" action="/change_status/{{ survey.id }}/" method="POST">
+                        {% csrf_token %}
+                        <label for="status_select_{{ survey.id }}">Select status:</label>
+                        <select name="status" id="status_select_{{ survey.id }}">
+                            <option value="Pending" {% if survey.status == 'Pending' %} selected {% endif %}>Pending</option>
+                            <option value="Ongoing" {% if survey.status == 'Ongoing' %} selected {% endif %}>Ongoing</option>
+                            <option value="Completed" {% if survey.status == 'Completed' %} selected {% endif %}>Completed</option>
+                        </select>
+                        <input type="button" value="Change Status" onclick="updateStatus('{{ survey.id }}')">
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Plus button for creating a new survey -->
+    <a href="{% url 'create_survey' %}" class="plus-button">+</a>
+
+    <br><br>
+    <a href="{% url 'logout' %}">Logout</a>
+
+    <script>
+        function updateStatus(surveyId) {
+            const formData = new FormData();
+            const statusSelect = document.getElementById(`status_select_${surveyId}`);
+            const newStatus = statusSelect.value;
+            formData.append('status', newStatus);
+
+            fetch(`/change_status/${surveyId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update status');
+                }
+            })
+            .then(data => {
+                document.getElementById(`status_${surveyId}`).innerText = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 </body>
 </html>

@@ -32,3 +32,12 @@ class Survey(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class Log(models.Model):
+    survey = models.ForeignKey('Survey', on_delete=models.CASCADE, related_name='logs')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"Log for {self.survey.name} at {self.timestamp}"

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm, LoginForm, SurveyForm
-from .models import Survey
+from .models import Survey, Log
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -91,8 +91,15 @@ def change_status(request, survey_id):
             if new_status in ['Pending', 'Ongoing', 'Completed']:
                 survey.status = new_status
                 survey.save()
+                Log.objects.create(survey=survey, description=f"Status changed to {new_status} by {request.user.username}")
+                
                 return JsonResponse({'status': new_status})  # Return JSON response with updated status
             else:
                 return JsonResponse({'error': 'Invalid status'}, status=400)
         else:
             return JsonResponse({'error': 'Permission denied'}, status=403)
+'''return JsonResponse({'status': new_status})  # Return JSON response with updated status
+            else:
+                return JsonResponse({'error': 'Invalid status'}, status=400)
+        else:
+            return JsonResponse({'error': 'Permission denied'}, status=403)'''

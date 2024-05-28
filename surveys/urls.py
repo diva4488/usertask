@@ -8,5 +8,5 @@ urlpatterns = [
     path('assigned_tasks/', views.assigned_tasks, name='assigned_tasks'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('change_status/<int:survey_id>/', views.change_status, name='change_status'),  # Add this line
+    path('change_status/<int:survey_id>/', views.change_status, name='change_status'),
 ]
